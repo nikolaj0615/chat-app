@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 
 import hamburgerMenu from '../assets/icons/ic_menu.svg';
 import edit from '../assets/icons/edit.svg';
@@ -6,24 +6,15 @@ import search from '../assets/icons/search.svg';
 import icAdd from '../assets/icons/ic_add.svg';
 import plus from '../assets/icons/plus.svg';
 
-const MenuIcon = () => <img src={hamburgerMenu} alt="menu" className="w-[20px] h-[20px]" />;
-const NewChatIcon = () => <img src={edit} alt="new chat" className="w-[20px] h-[20px]" />;
-const SearchIcon = () => <img src={search} alt="search" className="w-[20px] h-[20px]" />;
-const TasksIcon = () => <img src={icAdd} alt="tasks" className="w-[20px] h-[20px]" />;
-const PlusIcon = () => <img src={plus} alt="plus" className="w-[20px] h-[20px]" />;
+import type {Chat, Project} from '../Interfaces/types';
+
+const MenuIcon = () => <img src={hamburgerMenu} alt="menu" className="w-[20px] h-[20px]"/>;
+const NewChatIcon = () => <img src={edit} alt="new chat" className="w-[20px] h-[20px]"/>;
+const SearchIcon = () => <img src={search} alt="search" className="w-[20px] h-[20px]"/>;
+const TasksIcon = () => <img src={icAdd} alt="tasks" className="w-[20px] h-[20px]"/>;
+const PlusIcon = () => <img src={plus} alt="plus" className="w-[20px] h-[20px]"/>;
 const CloseIcon = () => <span className="text-[20px] text-gray-400">✕</span>;
 
-interface Project {
-    id: string;
-    name: string;
-    color: string;
-    letter: string;
-    isActive?: boolean;
-}
-interface ChatItem {
-    id: string;
-    title: string;
-}
 interface NavButtonProps {
     icon: React.ReactNode;
     label: string;
@@ -35,29 +26,20 @@ interface ProjectButtonProps {
     project: Project;
     isCollapsed: boolean;
 }
-interface ChatButtonProps {
-    title: string;
+
+interface SidebarProps {
+    chats: Chat[];
+    onNewChat: () => void;
+    onSelectChat: (chat: Chat) => void;
+    activeChatId?: any;
 }
 
 const projects: Project[] = [
-    { id: '1', name: 'Kingdom', color: 'bg-blue-500', letter: 'K', isActive: true },
-    { id: '2', name: 'GGM Moebel', color: 'bg-red-500', letter: 'G' },
+    {id: '1', name: 'Kingdom', color: 'bg-blue-500', letter: 'K', isActive: true},
+    {id: '2', name: 'GGM Moebel', color: 'bg-red-500', letter: 'G'},
 ];
 
-const todayChats: ChatItem[] = [
-    { id: '1', title: 'Amsterdam trip with the...' },
-    { id: '2', title: 'Superconductors: Smoot...' },
-];
-
-const previousChats: ChatItem[] = [
-    { id: '3', title: 'Marble Statue Pizza Cigar.' },
-    { id: '4', title: 'Gradient Background Pac...' },
-    { id: '5', title: 'Fern Gully, the Chief Leaf...' },
-    { id: '6', title: 'Design an Uber-like app' },
-    { id: '7', title: 'Product team meeting in...' },
-];
-
-function NavButton({ icon, label, isCollapsed, isActive }: NavButtonProps) {
+function NavButton({icon, label, isCollapsed, isActive}: NavButtonProps) {
     return (
         <button
             className={`
@@ -72,7 +54,7 @@ function NavButton({ icon, label, isCollapsed, isActive }: NavButtonProps) {
     );
 }
 
-function ProjectButton({ project, isCollapsed }: ProjectButtonProps) {
+function ProjectButton({project, isCollapsed}: ProjectButtonProps) {
     return (
         <button
             className={`
@@ -99,15 +81,8 @@ function ProjectButton({ project, isCollapsed }: ProjectButtonProps) {
     );
 }
 
-function ChatButton({ title }: ChatButtonProps) {
-    return (
-        <button className="text-left px-[8px] py-[8px] text-[14px] text-gray-300 hover:text-white hover:bg-dark-600 rounded-[8px] transition-colors truncate">
-            {title}
-        </button>
-    );
-}
 
-export default function Sidebar() {
+export default function Sidebar({chats, onNewChat, onSelectChat, activeChatId}: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -144,7 +119,7 @@ export default function Sidebar() {
                     onClick={() => setIsOpen(true)}
                     className="fixed top-[24px] left-[24px] z-50 p-[12px] bg-dark-800 rounded-[12px] text-gray-400 hover:text-white"
                 >
-                    <MenuIcon />
+                    <MenuIcon/>
                 </button>
             )}
 
@@ -162,22 +137,33 @@ export default function Sidebar() {
                     onClick={handleMenuClick}
                     className="text-gray-400 hover:text-white mb-[24px] self-start p-[8px] hover:bg-dark-600 rounded-[8px]"
                 >
-                    {isMobile && isOpen ? <CloseIcon /> : <MenuIcon />}
+                    {isMobile && isOpen ? <CloseIcon/> : <MenuIcon/>}
                 </button>
 
                 {/* Navigation */}
                 <nav className="flex flex-col gap-[8px]">
-                    <NavButton icon={<NewChatIcon />} label="New Chat" isCollapsed={!isMobile && isCollapsed} isActive />
-                    <NavButton icon={<SearchIcon />} label="Search Chats" isCollapsed={!isMobile && isCollapsed} />
-                    <NavButton icon={<TasksIcon />} label="My Tasks" isCollapsed={!isMobile && isCollapsed} />
+                    <button
+                        onClick={onNewChat}
+                        className={`
+                            flex items-center gap-[12px] p-[12px] rounded-[12px] text-white transition-colors
+                            bg-dark-600 hover:bg-dark-700
+                            ${!isMobile && isCollapsed ? 'justify-center' : ''}
+                        `}
+                    >
+                        <NewChatIcon/>
+                        {(!isCollapsed || isMobile) && <span className="text-[14px]">New Chat</span>}
+                    </button>
+                    <NavButton icon={<SearchIcon/>} label="Search Chats" isCollapsed={!isMobile && isCollapsed}/>
+                    <NavButton icon={<TasksIcon/>} label="My Tasks" isCollapsed={!isMobile && isCollapsed}/>
                 </nav>
 
                 {/* Projects */}
                 <div className="mt-[24px]">
-                    {(!isCollapsed || isMobile) && <p className="text-gray-500 text-[12px] mb-[8px] px-[8px]">Projects</p>}
+                    {(!isCollapsed || isMobile) &&
+                        <p className="text-gray-500 text-[12px] mb-[8px] px-[8px]">Projects</p>}
                     <div className="flex flex-col gap-[8px]">
                         {projects.map((project) => (
-                            <ProjectButton key={project.id} project={project} isCollapsed={!isMobile && isCollapsed} />
+                            <ProjectButton key={project.id} project={project} isCollapsed={!isMobile && isCollapsed}/>
                         ))}
                     </div>
                 </div>
@@ -185,19 +171,30 @@ export default function Sidebar() {
                 {/* Chat History - hide when collapsed on desktop */}
                 {(!isCollapsed || isMobile) && (
                     <div className="mt-[24px] flex-1 overflow-y-auto">
-                        <p className="text-gray-500 text-[12px] mb-[8px] px-[8px]">Today</p>
-                        <div className="flex flex-col gap-[4px]">
-                            {todayChats.map((chat) => (
-                                <ChatButton key={chat.id} title={chat.title} />
-                            ))}
-                        </div>
-
-                        <p className="text-gray-500 text-[12px] mb-[8px] mt-[16px] px-[8px]">Previous 30 Days</p>
-                        <div className="flex flex-col gap-[4px]">
-                            {previousChats.map((chat) => (
-                                <ChatButton key={chat.id} title={chat.title} />
-                            ))}
-                        </div>
+                        {chats.length > 0 ? (
+                            <>
+                                <p className="text-gray-500 text-[12px] mb-[8px] px-[8px]">Today</p>
+                                <div className="flex flex-col gap-[4px]">
+                                    {chats.map((chat) => (
+                                        <button
+                                            key={chat.id}
+                                            onClick={() => onSelectChat(chat)}
+                                            className={`
+                                text-left px-[8px] py-[8px] text-[14px] rounded-[8px] transition-colors truncate w-full
+                                ${activeChatId === chat.id
+                                                ? 'bg-dark-600 text-white'
+                                                : 'text-gray-300 hover:text-white hover:bg-dark-600'
+                                            }
+                            `}
+                                        >
+                                            {chat.title}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-gray-500 text-[12px] px-[8px]">No chats yet</p>
+                        )}
                     </div>
                 )}
 
@@ -209,7 +206,7 @@ export default function Sidebar() {
                             ${!isMobile && isCollapsed ? 'justify-center' : ''}
                         `}
                     >
-                        <PlusIcon />
+                        <PlusIcon/>
                         {(!isCollapsed || isMobile) && <span className="text-[14px]">Invite members</span>}
                     </button>
                 </div>

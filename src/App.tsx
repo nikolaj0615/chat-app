@@ -1,19 +1,7 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import Sidebar from './components/Sidebar';
 import MainContent from "./components/MainContent";
-
-export interface Message {
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-}
-
-export interface Chat {
-    id: string;
-    title: string;
-    messages: Message[];
-    createdAt: Date;
-}
+import type {Chat, Message} from './Interfaces/types';
 
 function App() {
     const [currentView, setCurrentView] = useState<'landing' | 'chat'>('landing');
@@ -45,9 +33,9 @@ function App() {
 
     const handleUpdateMessages = (messages: Message[]) => {
         if (activeChat) {
-            setActiveChat({ ...activeChat, messages });
+            setActiveChat({...activeChat, messages});
             setChats(prev => prev.map(chat =>
-                chat.id === activeChat.id ? { ...chat, messages } : chat
+                chat.id === activeChat.id ? {...chat, messages} : chat
             ));
         }
     };

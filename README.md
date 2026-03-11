@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# Kingdom Chat
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A ChatGPT-inspired AI chat application built with React, TypeScript, and Groq API. Features a clean dark UI with multi-conversation management and real-time AI responses powered by Llama 3.3 70B.
 
-Currently, two official plugins are available:
+![Kingdom Chat Screenshot](./screenshot.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Real-time AI responses via Groq API (Llama 3.3 70B)
+- Multi-conversation management with sidebar navigation
+- Conversation history — AI remembers context within a chat
+- Clean dark UI inspired by ChatGPT
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- **React 19** + **TypeScript**
+- **Vite** — fast dev server and build tool
+- **Tailwind CSS** — utility-first styling
+- **Groq API** — free, fast LLM inference (Llama 3.3 70B)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**1. Clone the repo**
+```bash
+git clone https://github.com/YOUR_USERNAME/chat-app.git
+cd chat-app
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**2. Install dependencies**
+```bash
+npm install
+```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**3. Add your Groq API key**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Create a `.env.local` file in the root:
+```
+VITE_GROQ_API_KEY=your_groq_api_key_here
+```
+
+Get a free API key at [console.groq.com](https://console.groq.com).
+
+**4. Start the dev server**
+```bash
+npm run dev
+```
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── MainContent.tsx   # Chat UI, message rendering, input
+│   └── Sidebar.tsx       # Conversation list, navigation
+├── services/
+│   └── gemini.ts         # Groq API integration
+├── Interfaces/
+│   └── types.ts          # TypeScript interfaces
+└── App.tsx               # State management, routing
 ```

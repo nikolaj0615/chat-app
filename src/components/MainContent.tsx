@@ -5,38 +5,38 @@ import analyticsIcon from '../assets/icons/analitycs.png';
 import supportIcon from '../assets/icons/suport.png';
 import plus from '../assets/icons/plus.svg';
 import arrowDown from '../assets/icons/ic_Keyboard_arrow_down.svg';
-import { useState } from 'react';
+import {useState} from 'react';
+import type {Message} from '../Interfaces/types'
+import {sendMessage} from '../services/gemini'
 
 interface MainContentProps {
     currentView: 'landing' | 'chat';
-    onStartChat: () => void;
+    onStartChat: (messages: Message[]) => void;
+    messages: Message[];
+    onUpdateMessages: (messages: Message[]) => void;
 }
 
-interface Message {
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-}
 
-const ArrowIcon = () => <img src={arrowDown} alt="menu" className="w-[20px] h-[20px]" />;
+const ArrowIcon = () => <img src={arrowDown} alt="menu" className="w-[20px] h-[20px]"/>;
 
-function CategoryCard({ icon, title }: { icon: string; title: string }) {
+function CategoryCard({icon, title}: { icon: string; title: string }) {
     return (
-        <div className="flex flex-col items-start gap-[8px] p-[16px] bg-dark-600 hover:bg-dark-700 rounded-[12px] text-left transition-colors w-full min-w-[140px] max-w-[180px] h-[118px] cursor-pointer">
-            <img src={icon} alt="" className="w-[24px] h-[24px]" />
+        <div
+            className="flex flex-col items-start gap-[8px] p-[16px] bg-dark-600 hover:bg-dark-700 rounded-[12px] text-left transition-colors w-full min-w-[140px] max-w-[180px] h-[118px] cursor-pointer">
+            <img src={icon} alt="" className="w-[24px] h-[24px]"/>
             <span className="text-[14px] text-white">{title}</span>
         </div>
     );
 }
 
-export default function MainContent({ currentView, onStartChat }: MainContentProps) {
+export default function MainContent({currentView, onStartChat, messages, onUpdateMessages}: MainContentProps) {
     const [inputValue, setInputValue] = useState('');
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const trimmedValue = inputValue.trim();
 
-        if (!trimmedValue) return;
+        if (!trimmedValue || isLoading) return;
 
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -44,25 +44,31 @@ export default function MainContent({ currentView, onStartChat }: MainContentPro
             content: trimmedValue
         };
 
-        setMessages(prev => {
-            const updatedMessages = [...prev, userMessage];
-            onStartChat(updatedMessages);
-            return updatedMessages;
-        });
+        const updatedMessages = [...messages, userMessage];
+        const isFirstMessage = messages.length === 0;
+
+        if (!isFirstMessage) {
+            onUpdateMessages(updatedMessages);
+        }
 
         setInputValue('');
+        setIsLoading(true);
 
+        const responseText = await sendMessage(updatedMessages);
 
-        setTimeout(() => {
-            const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                role: 'assistant',
-                content:
-                    'Sure! Imagine you have a slide in a playground. When you slide down, you can go really fast because the slide is smooth and slippery. This is a simulated response.'
-            };
+        const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: responseText
+        };
+        const finalMessages = [...updatedMessages, assistantMessage];
 
-            setMessages(prev => [...prev, assistantMessage]);
-        }, 1000);
+        if (isFirstMessage) {
+            onStartChat(finalMessages);
+        } else {
+            onUpdateMessages(finalMessages);
+        }
+        setIsLoading(false);
     };
 
 
@@ -77,24 +83,27 @@ export default function MainContent({ currentView, onStartChat }: MainContentPro
         <main className="flex-1 flex flex-col bg-dark-800 rounded-[16px] overflow-hidden">
             {/* Header */}
             <header className="flex items-center justify-end p-[16px]">
-                <button className="hidden md:flex items-center gap-[8px] px-[16px] py-[8px] bg-dark-600 rounded-[8px] text-white mr-auto">
-                    Kingdom <span className="text-gray-400"> <ArrowIcon /></span>
+                <button
+                    className="hidden md:flex items-center gap-[8px] px-[16px] py-[8px] bg-dark-600 rounded-[8px] text-white mr-auto">
+                    Kingdom <span className="text-gray-400"> <ArrowIcon/></span>
                 </button>
-                <div className="w-[32px] h-[32px] bg-purple-500 rounded-full flex items-center justify-center text-[12px] font-bold text-white">
+                <div
+                    className="w-[32px] h-[32px] bg-purple-500 rounded-full flex items-center justify-center text-[12px] font-bold text-white">
                     NS
                 </div>
             </header>
 
-            {/* Content - Landing ili Chat */}
             {currentView === 'landing' ? (
                 <div className="flex-1 flex flex-col items-center justify-center px-[16px]">
-                    <img src={crownLogo} alt="logo" className="w-[48px] h-[48px] mb-[16px]" />
-                    <h1 className="text-[20px] md:text-[24px] text-white mb-[24px] md:mb-[32px] text-center">What can we help with?</h1>
-                    <div className="grid grid-cols-2 gap-[12px] mb-[24px] md:mb-[32px] w-full max-w-[400px] md:max-w-[720px] md:grid-cols-4">
-                        <CategoryCard icon={appIcons} title="Message for Developers" />
-                        <CategoryCard icon={designIcon} title="Message for Designers" />
-                        <CategoryCard icon={analyticsIcon} title="Message for Analytics" />
-                        <CategoryCard icon={supportIcon} title="Message for Support" />
+                    <img src={crownLogo} alt="logo" className="w-[48px] h-[48px] mb-[16px]"/>
+                    <h1 className="text-[20px] md:text-[24px] text-white mb-[24px] md:mb-[32px] text-center">What can we
+                        help with?</h1>
+                    <div
+                        className="grid grid-cols-2 gap-[12px] mb-[24px] md:mb-[32px] w-full max-w-[400px] md:max-w-[720px] md:grid-cols-4">
+                        <CategoryCard icon={appIcons} title="Message for Developers"/>
+                        <CategoryCard icon={designIcon} title="Message for Designers"/>
+                        <CategoryCard icon={analyticsIcon} title="Message for Analytics"/>
+                        <CategoryCard icon={supportIcon} title="Message for Support"/>
                     </div>
                 </div>
             ) : (
@@ -124,14 +133,23 @@ export default function MainContent({ currentView, onStartChat }: MainContentPro
                             </div>
                         ))}
                     </div>
+                    {isLoading && (
+                        <div className="w-full max-w-[640px] flex gap-[12px]">
+                            <img src={crownLogo} alt="AI" className="w-[24px] h-[24px] mt-[4px] flex-shrink-0"/>
+                            <div className="flex gap-[4px] items-center">
+                                <span className="w-[6px] h-[6px] bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}/>
+                                <span className="w-[6px] h-[6px] bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}/>
+                                <span className="w-[6px] h-[6px] bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}/>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Input at bottom */}
             <div className="p-[16px] flex flex-col items-center">
                 <div className="flex items-center gap-[12px] bg-dark-600 rounded-[12px] p-[12px] w-full max-w-[639px]">
                     <button className="text-gray-400">
-                        <img src={plus} alt="add" className="w-[20px] h-[20px]" />
+                        <img src={plus} alt="add" className="w-[20px] h-[20px]"/>
                     </button>
                     <input
                         type="text"
